@@ -1606,12 +1606,118 @@ function calcularClassificacao(jogos) {
   return grupos;
 }
 
+function golsProNoJogo(jogo, nome) {
+  if (!temPlacar(jogo)) return 0;
+  if (jogo.time1 === nome) return Number(jogo.gols1);
+  if (jogo.time2 === nome) return Number(jogo.gols2);
+  return 0;
+}
+
+function golsContraNoJogo(jogo, nome) {
+  if (!temPlacar(jogo)) return 0;
+  if (jogo.time1 === nome) return Number(jogo.gols2);
+  if (jogo.time2 === nome) return Number(jogo.gols1);
+  return 0;
+}
+
+function jogosEntreTimesDoMesmoGrupo(nomes, grupo) {
+  const conjunto = new Set(nomes);
+
+  return estadoAtual.jogos.filter(jogo =>
+    temPlacar(jogo) &&
+    (!grupo || jogo.grupo === grupo) &&
+    conjunto.has(jogo.time1) &&
+    conjunto.has(jogo.time2)
+  );
+}
+
+function estatisticaConfrontoDireto(time, empatados, grupo) {
+  const nomes = empatados.map(t => t.nome);
+  const jogos = jogosEntreTimesDoMesmoGrupo(nomes, grupo);
+
+  const stats = {
+    pontos: 0,
+    golsPro: 0,
+    golsContra: 0,
+    saldo: 0
+  };
+
+  jogos.forEach(jogo => {
+    if (jogo.time1 !== time.nome && jogo.time2 !== time.nome) return;
+
+    const gp = golsProNoJogo(jogo, time.nome);
+    const gc = golsContraNoJogo(jogo, time.nome);
+
+    stats.golsPro += gp;
+    stats.golsContra += gc;
+
+    if (gp > gc) stats.pontos += 3;
+    else if (gp === gc) stats.pontos += 1;
+  });
+
+  stats.saldo = stats.golsPro - stats.golsContra;
+  return stats;
+}
+
+function criterioFairPlay(time) {
+  // A Football-Data normalmente não fornece cartões no endpoint de jogos da Copa.
+  // Se futuramente adicionarmos cartões, basta preencher time.fairPlay com a pontuação FIFA.
+  return Number(time.fairPlay ?? 0);
+}
+
+function criterioRankingFifa(time) {
+  // Fallback final quando não há dados de Fair Play/sorteio.
+  // Quanto menor o ranking, melhor. Se não existir, joga para o fim e usa ordem alfabética.
+  return Number(time.rankingFifa ?? 9999);
+}
+
+function compararFifa(a, b, empatados, grupo) {
+  if (b.pontos !== a.pontos) return b.pontos - a.pontos;
+
+  // Critérios entre as seleções empatadas, conforme regulamento FIFA 2026.
+  if (empatados && empatados.length > 1) {
+    const h2hA = estatisticaConfrontoDireto(a, empatados, grupo);
+    const h2hB = estatisticaConfrontoDireto(b, empatados, grupo);
+
+    if (h2hB.pontos !== h2hA.pontos) return h2hB.pontos - h2hA.pontos;
+    if (h2hB.saldo !== h2hA.saldo) return h2hB.saldo - h2hA.saldo;
+    if (h2hB.golsPro !== h2hA.golsPro) return h2hB.golsPro - h2hA.golsPro;
+  }
+
+  // Critérios gerais do grupo.
+  if (b.saldo !== a.saldo) return b.saldo - a.saldo;
+  if (b.golsPro !== a.golsPro) return b.golsPro - a.golsPro;
+
+  // Fair Play: quanto maior a pontuação de conduta, melhor.
+  if (criterioFairPlay(b) !== criterioFairPlay(a)) {
+    return criterioFairPlay(b) - criterioFairPlay(a);
+  }
+
+  // Fallback técnico quando a API não possui cartões/sorteio.
+  if (criterioRankingFifa(a) !== criterioRankingFifa(b)) {
+    return criterioRankingFifa(a) - criterioRankingFifa(b);
+  }
+
+  return traduzir(a.nome).localeCompare(traduzir(b.nome));
+}
+
 function ordenarTimes(times) {
-  return times.sort((a, b) => {
-    if (b.pontos !== a.pontos) return b.pontos - a.pontos;
-    if (b.saldo !== a.saldo) return b.saldo - a.saldo;
-    if (b.golsPro !== a.golsPro) return b.golsPro - a.golsPro;
-    return traduzir(a.nome).localeCompare(traduzir(b.nome));
+  const lista = [...times];
+  const grupo = lista[0]?.grupo || null;
+
+  const porPontos = new Map();
+  lista.forEach(time => {
+    const chave = String(time.pontos ?? 0);
+    if (!porPontos.has(chave)) porPontos.set(chave, []);
+    porPontos.get(chave).push(time);
+  });
+
+  return lista.sort((a, b) => {
+    const empatados = (a.pontos === b.pontos)
+      ? (porPontos.get(String(a.pontos ?? 0)) || [])
+      : null;
+
+    return compararFifa(a, b, empatados, grupo);
   });
 }
 
@@ -1995,7 +2101,7 @@ function renderizarTabelasCompletas() {
 
   html += `
     <div class="aviso-grupos">
-      ⚠️ As classificações são calculadas automaticamente com base nos resultados dos jogos.
+      ⚠️ As classificações são calculadas automaticamente com critérios de desempate FIFA: pontos, confronto direto, saldo, gols pró e Fair Play quando disponível.
     </div>
   `;
 
@@ -2211,14 +2317,14 @@ function renderizarMataMata() {
   }
 
   const oitavas = [
-    { numero: 89, a: "Vencedor J74", b: "Vencedor J77", regra: "W74 x W77" },
-    { numero: 90, a: "Vencedor J73", b: "Vencedor J75", regra: "W73 x W75" },
-    { numero: 91, a: "Vencedor J76", b: "Vencedor J78", regra: "W76 x W78" },
-    { numero: 92, a: "Vencedor J79", b: "Vencedor J80", regra: "W79 x W80" },
-    { numero: 93, a: "Vencedor J83", b: "Vencedor J84", regra: "W83 x W84" },
-    { numero: 94, a: "Vencedor J81", b: "Vencedor J82", regra: "W81 x W82" },
-    { numero: 95, a: "Vencedor J86", b: "Vencedor J88", regra: "W86 x W88" },
-    { numero: 96, a: "Vencedor J85", b: "Vencedor J87", regra: "W85 x W87" }
+    { numero: 89, a: "Vencedor J73", b: "Vencedor J75" },
+    { numero: 90, a: "Vencedor J74", b: "Vencedor J77" },
+    { numero: 91, a: "Vencedor J76", b: "Vencedor J78" },
+    { numero: 92, a: "Vencedor J79", b: "Vencedor J80" },
+    { numero: 93, a: "Vencedor J83", b: "Vencedor J84" },
+    { numero: 94, a: "Vencedor J81", b: "Vencedor J82" },
+    { numero: 95, a: "Vencedor J86", b: "Vencedor J88" },
+    { numero: 96, a: "Vencedor J85", b: "Vencedor J87" }
   ];
 
   const quartas = [
@@ -2249,7 +2355,7 @@ function renderizarMataMata() {
       </div>
     </div>
     <div class="bracket-note">
-      Regulamento 2026: classificam-se os 2 primeiros de cada grupo e os 8 melhores terceiros. A Fase de 32 usa os confrontos numerados de J73 a J88 e as rodadas seguintes seguem o caminho oficial: J89 = W74 x W77, J90 = W73 x W75, J91 = W76 x W78, J92 = W79 x W80, J93 = W83 x W84, J94 = W81 x W82, J95 = W86 x W88 e J96 = W85 x W87. As vagas de terceiros aparecem por grupos possíveis até a definição oficial dos 8 melhores terceiros.
+      Regulamento 2026: classificam-se os 2 primeiros de cada grupo e os 8 melhores terceiros. Os confrontos da Fase de 32 seguem a numeração oficial dos jogos 73 a 88; as vagas de terceiros ficam condicionadas à combinação final dos melhores terceiros.
     </div>
   `;
 }
