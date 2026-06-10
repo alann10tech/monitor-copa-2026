@@ -1023,6 +1023,7 @@
     <div class="tools" style="margin-top:0;">
       <button onclick="selecionarTodas()">Selecionar todas</button>
       <button onclick="limparSelecao()">Limpar seleção</button>
+      <button onclick="copiarLinkSelecoes()">🔗 Compartilhar seleções</button>
       </div>
 
     <input
@@ -1376,12 +1377,51 @@ function salvarSelecionados() {
 }
 
 function carregarSelecionados() {
+  const params = new URLSearchParams(window.location.search);
+  const timesUrl = params.get("times");
+
+  if (timesUrl) {
+    const times = timesUrl
+      .split(",")
+      .map(t => decodeURIComponent(t).trim())
+      .filter(Boolean)
+      .filter(ehSelecaoReal);
+
+    if (times.length) {
+      localStorage.setItem("selecoesCopa2026", JSON.stringify(times));
+      return times;
+    }
+  }
+
   try {
     const salvos = JSON.parse(localStorage.getItem("selecoesCopa2026") || "null");
     if (Array.isArray(salvos) && salvos.length) return salvos;
   } catch (e) {}
 
   return SELECOES_PADRAO;
+}
+
+function gerarLinkSelecoes() {
+  const url = new URL(window.location.href);
+  url.search = "";
+  url.hash = "";
+
+  if (estadoAtual.selecionados.length) {
+    url.searchParams.set("times", estadoAtual.selecionados.join(","));
+  }
+
+  return url.toString();
+}
+
+async function copiarLinkSelecoes() {
+  const link = gerarLinkSelecoes();
+
+  try {
+    await navigator.clipboard.writeText(link);
+    alert("Link copiado! Abra esse link em outro computador para carregar as mesmas seleções.");
+  } catch (erro) {
+    prompt("Copie este link para abrir em outro dispositivo:", link);
+  }
 }
 
 function alternarSelecao(time) {
