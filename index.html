@@ -534,8 +534,8 @@
     /* Layout organizado dos grupos */
     #tabelasCompletas {
       display: grid;
-      grid-template-columns: repeat(4, minmax(260px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(3, minmax(450px, 1fr));
+      gap: 20px;
       align-items: start;
     }
 
@@ -549,9 +549,9 @@
 
     .grupo-card h3 {
       margin: 0;
-      padding: 10px 12px 4px;
+      padding: 14px 14px 8px;
       text-align: center;
-      font-size: 18px;
+      font-size: 22px;
       color: var(--text);
     }
 
@@ -571,27 +571,27 @@
 
     .grupo-card th,
     .grupo-card td {
-      padding: 7px 4px;
-      font-size: 12px;
-      line-height: 1.2;
+      padding: 10px 8px;
+      font-size: 14px;
+      line-height: 1.25;
     }
 
     .grupo-card th:first-child,
     .grupo-card td:first-child {
-      width: 42%;
+      width: 46%;
       text-align: left;
     }
 
     .grupo-card th:not(:first-child),
     .grupo-card td:not(:first-child) {
-      width: 6.4%;
+      width: 6%;
       text-align: center;
     }
 
     .grupo-card .time-nome {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 8px;
       min-width: 0;
     }
 
@@ -602,10 +602,10 @@
     }
 
     .grupo-card .mini-flag {
-      width: 22px;
-      height: 15px;
+      width: 32px;
+      height: 22px;
       object-fit: cover;
-      border-radius: 2px;
+      border-radius: 4px;
       flex: 0 0 auto;
       box-shadow: 0 2px 4px rgba(0,0,0,.25);
     }
@@ -621,15 +621,15 @@
       color: var(--text);
     }
 
-    @media (max-width: 1250px) {
+    @media (max-width: 1450px) {
       #tabelasCompletas {
-        grid-template-columns: repeat(3, minmax(260px, 1fr));
+        grid-template-columns: repeat(2, minmax(420px, 1fr));
       }
     }
 
     @media (max-width: 950px) {
       #tabelasCompletas {
-        grid-template-columns: repeat(2, minmax(260px, 1fr));
+        grid-template-columns: 1fr;
       }
     }
 
@@ -741,14 +741,15 @@
     .modal-overlay.active { display: flex; }
 
     .modal-content {
-      width: min(1180px, 96vw);
-      max-height: 90vh;
+      width: 98vw;
+      max-width: 1800px;
+      max-height: 94vh;
       overflow: auto;
       background: #0b1628;
       border: 1px solid var(--border);
       border-radius: 20px;
       box-shadow: 0 30px 90px rgba(0,0,0,.65);
-      padding: 20px;
+      padding: 24px;
     }
 
     .modal-head {
