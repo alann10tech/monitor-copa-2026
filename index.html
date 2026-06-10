@@ -534,8 +534,8 @@
     /* Layout organizado dos grupos */
     #tabelasCompletas {
       display: grid;
-      grid-template-columns: repeat(3, minmax(450px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(4, minmax(260px, 1fr));
+      gap: 14px;
       align-items: start;
     }
 
@@ -549,9 +549,9 @@
 
     .grupo-card h3 {
       margin: 0;
-      padding: 14px 14px 8px;
+      padding: 10px 12px 4px;
       text-align: center;
-      font-size: 22px;
+      font-size: 18px;
       color: var(--text);
     }
 
@@ -571,27 +571,27 @@
 
     .grupo-card th,
     .grupo-card td {
-      padding: 10px 8px;
-      font-size: 14px;
-      line-height: 1.25;
+      padding: 7px 4px;
+      font-size: 12px;
+      line-height: 1.2;
     }
 
     .grupo-card th:first-child,
     .grupo-card td:first-child {
-      width: 46%;
+      width: 42%;
       text-align: left;
     }
 
     .grupo-card th:not(:first-child),
     .grupo-card td:not(:first-child) {
-      width: 6%;
+      width: 6.4%;
       text-align: center;
     }
 
     .grupo-card .time-nome {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 5px;
       min-width: 0;
     }
 
@@ -602,10 +602,10 @@
     }
 
     .grupo-card .mini-flag {
-      width: 32px;
-      height: 22px;
+      width: 22px;
+      height: 15px;
       object-fit: cover;
-      border-radius: 4px;
+      border-radius: 2px;
       flex: 0 0 auto;
       box-shadow: 0 2px 4px rgba(0,0,0,.25);
     }
@@ -621,15 +621,15 @@
       color: var(--text);
     }
 
-    @media (max-width: 1450px) {
+    @media (max-width: 1250px) {
       #tabelasCompletas {
-        grid-template-columns: repeat(2, minmax(420px, 1fr));
+        grid-template-columns: repeat(3, minmax(260px, 1fr));
       }
     }
 
     @media (max-width: 950px) {
       #tabelasCompletas {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(260px, 1fr));
       }
     }
 
@@ -758,55 +758,152 @@
       justify-content: space-between;
       gap: 14px;
       margin-bottom: 16px;
+      position: sticky;
+      top: -24px;
+      z-index: 5;
+      padding: 4px 0 14px;
+      background: #0b1628;
     }
 
     .modal-head h2 { margin: 0; }
 
+    /* Chaveamento estilo Copa */
+    .bracket-scroll {
+      width: 100%;
+      overflow-x: auto;
+      padding: 6px 4px 14px;
+    }
+
     .bracket-grid {
+      min-width: 1580px;
       display: grid;
-      grid-template-columns: repeat(4, minmax(220px, 1fr));
-      gap: 14px;
+      grid-template-columns: 1.25fr 1.08fr .96fr .86fr .78fr;
+      gap: 24px;
+      align-items: stretch;
     }
 
     .bracket-round {
-      background: rgba(255,255,255,.035);
+      background: rgba(255,255,255,.025);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 18px;
       padding: 14px;
+      position: relative;
+      min-height: 100%;
     }
 
     .bracket-round h3 {
-      margin: 0 0 12px;
+      margin: 0 0 14px;
       color: var(--yellow);
       text-align: center;
+      font-size: 20px;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+
+    .bracket-matches {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      height: calc(100% - 44px);
+      gap: 12px;
     }
 
     .bracket-match {
-      background: rgba(255,255,255,.045);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px;
-      margin-bottom: 10px;
+      background: linear-gradient(180deg, rgba(32,48,73,.98), rgba(23,36,58,.98));
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      padding: 9px 10px;
+      min-height: 86px;
+      position: relative;
+      box-shadow: 0 8px 18px rgba(0,0,0,.22);
+    }
+
+    .bracket-match::after {
+      content: "";
+      position: absolute;
+      right: -24px;
+      top: 50%;
+      width: 24px;
+      height: 2px;
+      background: rgba(250,204,21,.48);
+    }
+
+    .bracket-round:last-child .bracket-match::after {
+      display: none;
+    }
+
+    .bracket-round:not(:last-child) .bracket-match:nth-child(odd)::before {
+      content: "";
+      position: absolute;
+      right: -24px;
+      top: 50%;
+      width: 2px;
+      height: calc(100% + 12px);
+      background: rgba(250,204,21,.34);
+    }
+
+    .bracket-round:not(:last-child) .bracket-match:nth-child(even)::before {
+      content: "";
+      position: absolute;
+      right: -24px;
+      bottom: 50%;
+      width: 2px;
+      height: calc(100% + 12px);
+      background: rgba(250,204,21,.34);
+    }
+
+    .bracket-game-label {
+      color: #93c5fd;
+      font-size: 11px;
+      margin-bottom: 6px;
+      font-weight: 800;
+      letter-spacing: .2px;
+      text-transform: uppercase;
     }
 
     .bracket-team {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       justify-content: space-between;
-      padding: 5px 0;
-      font-weight: 800;
+      padding: 6px 8px;
+      font-weight: 900;
+      font-size: 14px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.035);
+      margin-top: 5px;
+      min-height: 30px;
+    }
+
+    .bracket-team span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .bracket-vs {
+      text-align: center;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1;
+      margin: 1px 0 -3px;
+      font-weight: 900;
     }
 
     .bracket-note {
       color: var(--muted);
       font-size: 12px;
       text-align: center;
-      margin-top: 12px;
+      margin-top: 14px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(255,255,255,.035);
     }
 
     @media(max-width: 950px) {
-      .games-center-grid, .bracket-grid { grid-template-columns: 1fr; }
+      .games-center-grid { grid-template-columns: 1fr; }
+      .bracket-grid { min-width: 1400px; }
     }
 
 
@@ -2054,12 +2151,21 @@ function renderizarMataMata() {
     jogosOitavas.push([a, b]);
   }
 
+  const fase32 = jogosOitavas;
+  const oitavas = Array.from({ length: 8 }, (_, i) => [`Vencedor F32-${i * 2 + 1}`, `Vencedor F32-${i * 2 + 2}`]);
+  const quartas = Array.from({ length: 4 }, (_, i) => [`Vencedor O${i * 2 + 1}`, `Vencedor O${i * 2 + 2}`]);
+  const semifinais = Array.from({ length: 2 }, (_, i) => [`Vencedor Q${i * 2 + 1}`, `Vencedor Q${i * 2 + 2}`]);
+  const final = [["Vencedor S1", "Vencedor S2"]];
+
   div.innerHTML = `
-    <div class="bracket-grid">
-      ${renderizarRodadaMataMata("Oitavas", jogosOitavas)}
-      ${renderizarRodadaMataMata("Quartas", Array.from({ length: 8 }, (_, i) => [`Vencedor O${i * 2 + 1}`, `Vencedor O${i * 2 + 2}`]))}
-      ${renderizarRodadaMataMata("Semifinais", Array.from({ length: 4 }, (_, i) => [`Vencedor Q${i * 2 + 1}`, `Vencedor Q${i * 2 + 2}`]))}
-      ${renderizarRodadaMataMata("Final", [["Vencedor S1", "Vencedor S2"]])}
+    <div class="bracket-scroll">
+      <div class="bracket-grid">
+        ${renderizarRodadaMataMata("Fase 32", fase32, "F32")}
+        ${renderizarRodadaMataMata("Oitavas", oitavas, "O")}
+        ${renderizarRodadaMataMata("Quartas", quartas, "Q")}
+        ${renderizarRodadaMataMata("Semifinais", semifinais, "S")}
+        ${renderizarRodadaMataMata("Final", final, "F")}
+      </div>
     </div>
     <div class="bracket-note">
       Chaveamento provisório calculado pelos dados atuais. Quando os jogos tiverem resultados, os classificados serão atualizados automaticamente.
@@ -2067,17 +2173,20 @@ function renderizarMataMata() {
   `;
 }
 
-function renderizarRodadaMataMata(titulo, jogos) {
+function renderizarRodadaMataMata(titulo, jogos, prefixo = "J") {
   return `
     <div class="bracket-round">
       <h3>${titulo}</h3>
-      ${jogos.map((j, i) => `
-        <div class="bracket-match">
-          <div class="game-meta">Jogo ${i + 1}</div>
-          <div class="bracket-team"><span>${j[0]}</span></div>
-          <div class="bracket-team"><span>${j[1]}</span></div>
-        </div>
-      `).join("")}
+      <div class="bracket-matches">
+        ${jogos.map((j, i) => `
+          <div class="bracket-match">
+            <div class="bracket-game-label">${prefixo}${i + 1}</div>
+            <div class="bracket-team"><span>${j[0]}</span></div>
+            <div class="bracket-vs">VS</div>
+            <div class="bracket-team"><span>${j[1]}</span></div>
+          </div>
+        `).join("")}
+      </div>
     </div>
   `;
 }
