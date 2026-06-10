@@ -856,6 +856,7 @@
     </div>
     <div class="knockout-actions">
       <button class="knockout-btn" onclick="abrirMataMata()">🏆 Ver mata-mata</button>
+      <button class="knockout-btn" onclick="abrirGrupos()">🌍 Ver grupos</button>
     </div>
   </section>
 
@@ -953,8 +954,6 @@
   <h2 class="section-title">📊 Tabela resumida das seleções acompanhadas</h2>
   <div id="tabelaAposta" class="table-wrap"></div>
 
-  <h2 class="section-title">🌍 Classificação completa dos grupos</h2>
-  <div id="tabelasCompletas"></div>
 
 </div>
 
@@ -968,6 +967,18 @@
     </div>
     <div id="conteudoMataMata">
       <div class="loading">Carregando mata-mata...</div>
+    </div>
+  </div>
+</div>
+
+<div id="modalGrupos" class="modal-overlay" onclick="fecharGruposFora(event)">
+  <div class="modal-content">
+    <div class="modal-head">
+      <h2>🌍 Classificação completa dos grupos</h2>
+      <button onclick="fecharGrupos()">Fechar</button>
+    </div>
+    <div id="tabelasCompletas">
+      <div class="loading">Carregando grupos...</div>
     </div>
   </div>
 </div>
@@ -1812,6 +1823,7 @@ function renderizarTabelaAposta(lista) {
 
 function renderizarTabelasCompletas() {
   const div = document.getElementById("tabelasCompletas");
+  if (!div) return;
   div.innerHTML = "";
 
   const grupos = Object.keys(estadoAtual.grupos).sort();
@@ -1969,6 +1981,21 @@ function fecharMataMata() {
 function fecharMataMataFora(event) {
   if (event.target && event.target.id === "modalMataMata") {
     fecharMataMata();
+  }
+}
+
+function abrirGrupos() {
+  renderizarTabelasCompletas();
+  document.getElementById("modalGrupos")?.classList.add("active");
+}
+
+function fecharGrupos() {
+  document.getElementById("modalGrupos")?.classList.remove("active");
+}
+
+function fecharGruposFora(event) {
+  if (event.target && event.target.id === "modalGrupos") {
+    fecharGrupos();
   }
 }
 
