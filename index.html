@@ -741,14 +741,15 @@
     .modal-overlay.active { display: flex; }
 
     .modal-content {
-      width: min(1180px, 96vw);
-      max-height: 90vh;
+      width: 98vw;
+      max-width: 1800px;
+      max-height: 94vh;
       overflow: auto;
       background: #0b1628;
       border: 1px solid var(--border);
       border-radius: 20px;
       box-shadow: 0 30px 90px rgba(0,0,0,.65);
-      padding: 20px;
+      padding: 24px;
     }
 
     .modal-head {
@@ -757,55 +758,152 @@
       justify-content: space-between;
       gap: 14px;
       margin-bottom: 16px;
+      position: sticky;
+      top: -24px;
+      z-index: 5;
+      padding: 4px 0 14px;
+      background: #0b1628;
     }
 
     .modal-head h2 { margin: 0; }
 
+    /* Chaveamento estilo Copa */
+    .bracket-scroll {
+      width: 100%;
+      overflow-x: auto;
+      padding: 6px 4px 14px;
+    }
+
     .bracket-grid {
+      min-width: 1580px;
       display: grid;
-      grid-template-columns: repeat(4, minmax(220px, 1fr));
-      gap: 14px;
+      grid-template-columns: 1.25fr 1.08fr .96fr .86fr .78fr;
+      gap: 24px;
+      align-items: stretch;
     }
 
     .bracket-round {
-      background: rgba(255,255,255,.035);
+      background: rgba(255,255,255,.025);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 18px;
       padding: 14px;
+      position: relative;
+      min-height: 100%;
     }
 
     .bracket-round h3 {
-      margin: 0 0 12px;
+      margin: 0 0 14px;
       color: var(--yellow);
       text-align: center;
+      font-size: 20px;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+
+    .bracket-matches {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      height: calc(100% - 44px);
+      gap: 12px;
     }
 
     .bracket-match {
-      background: rgba(255,255,255,.045);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px;
-      margin-bottom: 10px;
+      background: linear-gradient(180deg, rgba(32,48,73,.98), rgba(23,36,58,.98));
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      padding: 9px 10px;
+      min-height: 86px;
+      position: relative;
+      box-shadow: 0 8px 18px rgba(0,0,0,.22);
+    }
+
+    .bracket-match::after {
+      content: "";
+      position: absolute;
+      right: -24px;
+      top: 50%;
+      width: 24px;
+      height: 2px;
+      background: rgba(250,204,21,.48);
+    }
+
+    .bracket-round:last-child .bracket-match::after {
+      display: none;
+    }
+
+    .bracket-round:not(:last-child) .bracket-match:nth-child(odd)::before {
+      content: "";
+      position: absolute;
+      right: -24px;
+      top: 50%;
+      width: 2px;
+      height: calc(100% + 12px);
+      background: rgba(250,204,21,.34);
+    }
+
+    .bracket-round:not(:last-child) .bracket-match:nth-child(even)::before {
+      content: "";
+      position: absolute;
+      right: -24px;
+      bottom: 50%;
+      width: 2px;
+      height: calc(100% + 12px);
+      background: rgba(250,204,21,.34);
+    }
+
+    .bracket-game-label {
+      color: #93c5fd;
+      font-size: 11px;
+      margin-bottom: 6px;
+      font-weight: 800;
+      letter-spacing: .2px;
+      text-transform: uppercase;
     }
 
     .bracket-team {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       justify-content: space-between;
-      padding: 5px 0;
-      font-weight: 800;
+      padding: 6px 8px;
+      font-weight: 900;
+      font-size: 14px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.035);
+      margin-top: 5px;
+      min-height: 30px;
+    }
+
+    .bracket-team span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .bracket-vs {
+      text-align: center;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1;
+      margin: 1px 0 -3px;
+      font-weight: 900;
     }
 
     .bracket-note {
       color: var(--muted);
       font-size: 12px;
       text-align: center;
-      margin-top: 12px;
+      margin-top: 14px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(255,255,255,.035);
     }
 
     @media(max-width: 950px) {
-      .games-center-grid, .bracket-grid { grid-template-columns: 1fr; }
+      .games-center-grid { grid-template-columns: 1fr; }
+      .bracket-grid { min-width: 1400px; }
     }
 
 
@@ -1999,17 +2097,35 @@ function fecharGruposFora(event) {
   }
 }
 
+function letraGrupo(nomeGrupo) {
+  const texto = String(nomeGrupo || "").trim();
+  const match = texto.match(/Grupo\s+([A-L])/i) || texto.match(/GROUP[_\s-]*([A-L])/i);
+  return match ? match[1].toUpperCase() : texto.toUpperCase();
+}
+
 function obterClassificadosPorGrupo() {
-  const grupos = Object.keys(estadoAtual.grupos).sort();
-  const primeiros = [];
-  const segundos = [];
+  const gruposOrdenados = Object.keys(estadoAtual.grupos).sort((a, b) =>
+    letraGrupo(a).localeCompare(letraGrupo(b))
+  );
+
+  const porGrupo = {};
   const terceiros = [];
 
-  grupos.forEach(grupo => {
+  gruposOrdenados.forEach(grupo => {
+    const letra = letraGrupo(grupo);
     const times = ordenarTimes(Object.values(estadoAtual.grupos[grupo]));
-    if (times[0]) primeiros.push({ grupo, time: times[0] });
-    if (times[1]) segundos.push({ grupo, time: times[1] });
-    if (times[2]) terceiros.push({ grupo, time: times[2] });
+
+    porGrupo[letra] = {
+      grupo,
+      times,
+      primeiro: times[0] || null,
+      segundo: times[1] || null,
+      terceiro: times[2] || null
+    };
+
+    if (times[2]) {
+      terceiros.push({ grupo: letra, time: times[2] });
+    }
   });
 
   terceiros.sort((a, b) => {
@@ -2019,64 +2135,139 @@ function obterClassificadosPorGrupo() {
     return traduzir(a.time.nome).localeCompare(traduzir(b.time.nome));
   });
 
-  return { primeiros, segundos, melhoresTerceiros: terceiros.slice(0, 8) };
+  return {
+    porGrupo,
+    melhoresTerceiros: terceiros.slice(0, 8)
+  };
 }
 
-function nomeClassificado(item, fallback) {
-  if (!item || !item.time) return fallback;
-  return `${flagTexto(item.time.nome)} ${traduzir(item.time.nome)}`;
+function nomeClassificadoPorPosicao(porGrupo, grupo, posicao, fallback) {
+  const infoGrupo = porGrupo[grupo];
+  if (!infoGrupo || !infoGrupo.times[posicao - 1]) return fallback;
+
+  const time = infoGrupo.times[posicao - 1];
+  return `${flagTexto(time.nome)} ${traduzir(time.nome)}`;
+}
+
+function nomeTerceiroPermitido(melhoresTerceiros, gruposPermitidos, usadosTerceiros) {
+  const permitido = gruposPermitidos.map(g => g.toUpperCase());
+  const escolhido = melhoresTerceiros.find(item =>
+    permitido.includes(item.grupo) && !usadosTerceiros.has(item.grupo)
+  );
+
+  if (!escolhido) {
+    return `3º ${gruposPermitidos.join("/")}`;
+  }
+
+  usadosTerceiros.add(escolhido.grupo);
+  return `${flagTexto(escolhido.time.nome)} ${traduzir(escolhido.time.nome)}`;
+}
+
+function montarFase32Regulamento2026() {
+  const { porGrupo, melhoresTerceiros } = obterClassificadosPorGrupo();
+  const usadosTerceiros = new Set();
+
+  const p = (grupo, posicao) => {
+    const ordinal = posicao === 1 ? "1º" : posicao === 2 ? "2º" : `${posicao}º`;
+    return nomeClassificadoPorPosicao(
+      porGrupo,
+      grupo,
+      posicao,
+      `${ordinal} Grupo ${grupo}`
+    );
+  };
+
+  const t = (...grupos) => nomeTerceiroPermitido(melhoresTerceiros, grupos, usadosTerceiros);
+
+  return [
+    { numero: 73, a: p("A", 2), b: p("B", 2), regra: "2A x 2B" },
+    { numero: 74, a: p("E", 1), b: t("A", "B", "C", "D", "F"), regra: "1E x 3A/B/C/D/F" },
+    { numero: 75, a: p("F", 1), b: p("C", 2), regra: "1F x 2C" },
+    { numero: 76, a: p("C", 1), b: p("F", 2), regra: "1C x 2F" },
+    { numero: 77, a: p("I", 1), b: t("C", "D", "F", "G", "H"), regra: "1I x 3C/D/F/G/H" },
+    { numero: 78, a: p("E", 2), b: p("I", 2), regra: "2E x 2I" },
+    { numero: 79, a: p("A", 1), b: t("C", "E", "F", "H", "I"), regra: "1A x 3C/E/F/H/I" },
+    { numero: 80, a: p("L", 1), b: t("E", "H", "I", "J", "K"), regra: "1L x 3E/H/I/J/K" },
+    { numero: 81, a: p("D", 1), b: t("B", "E", "F", "I", "J"), regra: "1D x 3B/E/F/I/J" },
+    { numero: 82, a: p("G", 1), b: t("A", "E", "H", "I", "J"), regra: "1G x 3A/E/H/I/J" },
+    { numero: 83, a: p("K", 2), b: p("L", 2), regra: "2K x 2L" },
+    { numero: 84, a: p("H", 1), b: p("J", 2), regra: "1H x 2J" },
+    { numero: 85, a: p("B", 1), b: t("E", "F", "G", "I", "J"), regra: "1B x 3E/F/G/I/J" },
+    { numero: 86, a: p("J", 1), b: p("H", 2), regra: "1J x 2H" },
+    { numero: 87, a: p("K", 1), b: t("D", "E", "I", "J", "L"), regra: "1K x 3D/E/I/J/L" },
+    { numero: 88, a: p("D", 2), b: p("G", 2), regra: "2D x 2G" }
+  ];
 }
 
 function renderizarMataMata() {
   const div = document.getElementById("conteudoMataMata");
   if (!div) return;
 
-  const { primeiros, segundos, melhoresTerceiros } = obterClassificadosPorGrupo();
+  const fase32 = montarFase32Regulamento2026();
 
-  if (!primeiros.length) {
+  if (!fase32.length) {
     div.innerHTML = `<div class="loading">O mata-mata será montado automaticamente quando os grupos estiverem disponíveis.</div>`;
     return;
   }
 
-  const jogosOitavas = [];
-  for (let i = 0; i < 16; i++) {
-    let a;
-    let b;
-    if (i < 8) {
-      a = nomeClassificado(primeiros[i], `${i + 1}º líder de grupo`);
-      b = nomeClassificado(melhoresTerceiros[i], `Melhor 3º #${i + 1}`);
-    } else {
-      const idx = i - 8;
-      a = nomeClassificado(segundos[idx], `${idx + 1}º segundo colocado`);
-      b = nomeClassificado(segundos[15 - i], `${16 - i}º segundo colocado`);
-    }
-    jogosOitavas.push([a, b]);
-  }
+  const oitavas = [
+    { numero: 89, a: "Vencedor J73", b: "Vencedor J75" },
+    { numero: 90, a: "Vencedor J74", b: "Vencedor J77" },
+    { numero: 91, a: "Vencedor J76", b: "Vencedor J78" },
+    { numero: 92, a: "Vencedor J79", b: "Vencedor J80" },
+    { numero: 93, a: "Vencedor J83", b: "Vencedor J84" },
+    { numero: 94, a: "Vencedor J81", b: "Vencedor J82" },
+    { numero: 95, a: "Vencedor J86", b: "Vencedor J88" },
+    { numero: 96, a: "Vencedor J85", b: "Vencedor J87" }
+  ];
+
+  const quartas = [
+    { numero: 97, a: "Vencedor J89", b: "Vencedor J90" },
+    { numero: 98, a: "Vencedor J93", b: "Vencedor J94" },
+    { numero: 99, a: "Vencedor J91", b: "Vencedor J92" },
+    { numero: 100, a: "Vencedor J95", b: "Vencedor J96" }
+  ];
+
+  const semifinais = [
+    { numero: 101, a: "Vencedor J97", b: "Vencedor J98" },
+    { numero: 102, a: "Vencedor J99", b: "Vencedor J100" }
+  ];
+
+  const finais = [
+    { numero: 103, a: "Perdedor J101", b: "Perdedor J102", regra: "Disputa do 3º lugar" },
+    { numero: 104, a: "Vencedor J101", b: "Vencedor J102", regra: "Final" }
+  ];
 
   div.innerHTML = `
-    <div class="bracket-grid">
-      ${renderizarRodadaMataMata("Oitavas", jogosOitavas)}
-      ${renderizarRodadaMataMata("Quartas", Array.from({ length: 8 }, (_, i) => [`Vencedor O${i * 2 + 1}`, `Vencedor O${i * 2 + 2}`]))}
-      ${renderizarRodadaMataMata("Semifinais", Array.from({ length: 4 }, (_, i) => [`Vencedor Q${i * 2 + 1}`, `Vencedor Q${i * 2 + 2}`]))}
-      ${renderizarRodadaMataMata("Final", [["Vencedor S1", "Vencedor S2"]])}
+    <div class="bracket-scroll">
+      <div class="bracket-grid">
+        ${renderizarRodadaMataMata("Fase de 32", fase32, "Jogo")}
+        ${renderizarRodadaMataMata("Oitavas", oitavas, "Jogo")}
+        ${renderizarRodadaMataMata("Quartas", quartas, "Jogo")}
+        ${renderizarRodadaMataMata("Semifinais", semifinais, "Jogo")}
+        ${renderizarRodadaMataMata("Final", finais, "Jogo")}
+      </div>
     </div>
     <div class="bracket-note">
-      Chaveamento provisório calculado pelos dados atuais. Quando os jogos tiverem resultados, os classificados serão atualizados automaticamente.
+      Regulamento 2026: classificam-se os 2 primeiros de cada grupo e os 8 melhores terceiros. Os confrontos da Fase de 32 seguem a numeração oficial dos jogos 73 a 88; as vagas de terceiros ficam condicionadas à combinação final dos melhores terceiros.
     </div>
   `;
 }
 
-function renderizarRodadaMataMata(titulo, jogos) {
+function renderizarRodadaMataMata(titulo, jogos, prefixo = "Jogo") {
   return `
     <div class="bracket-round">
       <h3>${titulo}</h3>
-      ${jogos.map((j, i) => `
-        <div class="bracket-match">
-          <div class="game-meta">Jogo ${i + 1}</div>
-          <div class="bracket-team"><span>${j[0]}</span></div>
-          <div class="bracket-team"><span>${j[1]}</span></div>
-        </div>
-      `).join("")}
+      <div class="bracket-matches">
+        ${jogos.map(j => `
+          <div class="bracket-match">
+            <div class="bracket-game-label">${prefixo} ${j.numero}${j.regra ? ` • ${j.regra}` : ""}</div>
+            <div class="bracket-team"><span>${j.a}</span></div>
+            <div class="bracket-vs">VS</div>
+            <div class="bracket-team"><span>${j.b}</span></div>
+          </div>
+        `).join("")}
+      </div>
     </div>
   `;
 }
