@@ -1087,7 +1087,7 @@
 </footer>
 
 <script>
-const URL = "/.netlify/functions/football-data";
+const API_URL = "/.netlify/functions/football-data";
 
 const SELECOES_PADRAO = [
   "France", "Spain", "England", "Brazil", "Germany", "Portugal",
@@ -1402,26 +1402,40 @@ function carregarSelecionados() {
 }
 
 function gerarLinkSelecoes() {
-  const url = new URL(window.location.href);
-  url.search = "";
-  url.hash = "";
+  const urlAtual = new window.URL(window.location.href);
+  urlAtual.search = "";
+  urlAtual.hash = "";
 
   if (estadoAtual.selecionados.length) {
-    url.searchParams.set("times", estadoAtual.selecionados.join(","));
+    urlAtual.searchParams.set("times", estadoAtual.selecionados.join(","));
   }
 
-  return url.toString();
+  return urlAtual.toString();
 }
 
-async function copiarLinkSelecoes() {
+function copiarLinkSelecoes() {
   const link = gerarLinkSelecoes();
 
+  const textarea = document.createElement("textarea");
+  textarea.value = link;
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  textarea.style.top = "0";
+  textarea.setAttribute("readonly", "readonly");
+
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  textarea.setSelectionRange(0, 99999);
+
   try {
-    await navigator.clipboard.writeText(link);
-    alert("Link copiado! Abra esse link em outro computador para carregar as mesmas seleções.");
-  } catch (erro) {
-    prompt("Copie este link para abrir em outro dispositivo:", link);
+    document.execCommand("copy");
+    alert("Link copiado com sucesso!\n\n" + link + "\n\nAbra este link em outro computador para carregar as mesmas seleções.");
+  } catch (e) {
+    prompt("Copie o link abaixo:", link);
   }
+
+  document.body.removeChild(textarea);
 }
 
 function alternarSelecao(time) {
@@ -1547,7 +1561,7 @@ async function carregarDados() {
   document.getElementById("cards").innerHTML = `<div class="loading">Carregando dados da Football-Data...</div>`;
 
   try {
-    const resposta = await fetch(URL + "?cache=" + Date.now());
+    const resposta = await fetch(API_URL + "?cache=" + Date.now());
 
     if (!resposta.ok) {
       throw new Error("HTTP " + resposta.status);
