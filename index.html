@@ -66,30 +66,26 @@
       filter: drop-shadow(0 0 16px rgba(250,204,21,.35));
     }
 
-    .header-title h1 {
+    .logo-title {
       margin: 0;
-      font-size: clamp(30px, 4vw, 48px);
+      font-size: clamp(42px, 5vw, 72px);
       font-weight: 900;
       line-height: 1;
-      letter-spacing: 1px;
+      letter-spacing: 2px;
       text-transform: uppercase;
-      text-shadow: 0 4px 18px rgba(0,0,0,.45);
+      color: #ffd700;
+      text-shadow:
+        0 0 12px rgba(255,215,0,.35),
+        0 0 25px rgba(255,215,0,.20),
+        0 0 45px rgba(255,215,0,.10);
     }
 
-    .header-title .monitor {
-      color: #ffffff;
-      font-style: italic;
-    }
-
-    .header-title .copa {
-      color: var(--yellow);
-    }
-
-    .header-title p {
-      margin: 8px 0 0;
-      color: #cbd5e1;
-      font-size: 15px;
+    .logo-subtitle {
+      margin: 12px 0 0;
+      color: #dbeafe;
+      font-size: 18px;
       font-weight: 600;
+      letter-spacing: .4px;
     }
 
     .header-right {
@@ -923,11 +919,8 @@
       <div class="header-trophy">🏆</div>
 
       <div class="header-title">
-        <h1>
-          <span class="monitor">MONITOR</span>
-          <span class="copa"> COPA 2026</span>
-        </h1>
-        <p>Acompanhe todas as seleções da Copa do Mundo</p>
+        <h1 class="logo-title">MONITOR DA COPA 2026</h1>
+        <p class="logo-subtitle">Acompanhe grupos, jogos e classificação em tempo real</p>
       </div>
     </div>
 
